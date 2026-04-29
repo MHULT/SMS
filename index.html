@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Security Management System — Säkerhetshantering</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #1A2456;
+      --blue:   #2D6ADF;
+      --blue-lt:#4A85F5;
+      --indigo: #1E3A8A;
+      --light:  #EEF3FF;
+      --muted:  #6B7280;
+      --border: #E5E9F2;
+      --white:  #FFFFFF;
+      --dark:   #0F172A;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--dark);
+      background: var(--white);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 5%;
+      height: 72px;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      transition: box-shadow .3s;
+    }
+    nav.scrolled { box-shadow: 0 2px 20px rgba(26,36,86,.08); }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    .nav-logo img { height: 36px; width: auto; }
+    .nav-logo span {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: -.3px;
+      line-height: 1.2;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--navy); }
+    .nav-links a.active { color: var(--navy); }
+
+    .nav-cta {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all .2s;
+    }
+    .btn-outline {
+      color: var(--navy);
+      border: 1.5px solid var(--border);
+      background: transparent;
+    }
+    .btn-outline:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: var(--light);
+    }
+    .btn-primary {
+      background: var(--navy);
+      color: var(--white);
+    }
+    .btn-primary:hover {
+      background: var(--blue);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(45,106,223,.3);
+    }
+    .btn-lg {
+      padding: 14px 32px;
+      font-size: 15px;
+      border-radius: 10px;
+    }
+    .btn-hero-outline {
+      background: rgba(255,255,255,.12);
+      color: var(--white);
+      border: 1.5px solid rgba(255,255,255,.3);
+    }
+    .btn-hero-outline:hover {
+      background: rgba(255,255,255,.22);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--navy) 0%, #1E3A8A 45%, #2D6ADF 100%);
+      display: flex;
+      align-items: center;
+      padding: 100px 5% 60px;
+      overflow: hidden;
+      position: relative;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .hero-inner {
+      position: relative;
+      max-width: 1280px;
+      margin: 0 auto;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      color: rgba(255,255,255,.9);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: 24px;
+    }
+    .hero-badge span {
+      width: 6px; height: 6px;
+      background: #4ade80;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .hero h1 {
+      font-size: clamp(36px, 4.5vw, 58px);
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 20px;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: #93C5FD;
+    }
+    .hero p {
+      font-size: 17px;
+      color: rgba(255,255,255,.72);
+      line-height: 1.7;
+      margin-bottom: 36px;
+      max-width: 480px;
+    }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    .hero-stats {
+      display: flex;
+      gap: 32px;
+      margin-top: 48px;
+      padding-top: 36px;
+      border-top: 1px solid rgba(255,255,255,.12);
+    }
+    .hero-stat strong {
+      display: block;
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--white);
+      letter-spacing: -1px;
+    }
+    .hero-stat span {
+      font-size: 13px;
+      color: rgba(255,255,255,.55);
+      font-weight: 500;
+    }
+
+    /* ── PHONE MOCKUPS ── */
+    .hero-mockups {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      position: relative;
+      height: 580px;
+    }
+    .phone-wrap {
+      position: absolute;
+      filter: drop-shadow(0 32px 64px rgba(0,0,0,.5));
+      transition: transform .4s ease;
+    }
+    .phone-wrap:hover { transform: translateY(-10px) !important; }
+    .phone-wrap.back {
+      right: 0;
+      bottom: 0;
+      transform: rotate(5deg) translateX(20px) translateY(10px);
+      z-index: 1;
+      opacity: .88;
+    }
+    .phone-wrap.front {
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 0;
+      z-index: 2;
+    }
+    .mockup-img {
+      height: 520px;
+      width: auto;
+      border-radius: 28px;
+      display: block;
+    }
+    .phone-wrap.back .mockup-img {
+      height: 480px;
+    }
+
+    /* ── SECTION SHARED ── */
+    section { padding: 96px 5%; }
+    .container { max-width: 1280px; margin: 0 auto; }
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 16px;
+    }
+    .section-label::before {
+      content: '';
+      width: 20px; height: 2px;
+      background: var(--blue);
+      display: block;
+    }
+    h2 {
+      font-size: clamp(28px, 3.5vw, 44px);
+      font-weight: 800;
+      letter-spacing: -1.2px;
+      line-height: 1.1;
+      color: var(--navy);
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 17px;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 560px;
+    }
+
+    /* ── FEATURES ── */
+    .features { background: var(--white); }
+    .features-header { text-align: center; margin-bottom: 64px; }
+    .features-header .section-sub { margin: 0 auto; }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+    .feature-card {
+      padding: 32px;
+      border-radius: 16px;
+      border: 1.5px solid var(--border);
+      background: var(--white);
+      transition: all .25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, var(--navy), var(--blue));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .25s ease;
+    }
+    .feature-card:hover {
+      border-color: #C7D4F8;
+      box-shadow: 0 12px 40px rgba(26,36,86,.08);
+      transform: translateY(-4px);
+    }
+    .feature-card:hover::after { transform: scaleX(1); }
+
+    .feature-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .feature-card h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 10px;
+      letter-spacing: -.3px;
+    }
+    .feature-card p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .how { background: var(--light); }
+    .how-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+    .steps { display: flex; flex-direction: column; gap: 0; }
+    .step {
+      display: flex;
+      gap: 20px;
+      padding: 24px 0;
+      position: relative;
+    }
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 64px;
+      bottom: -24px;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--blue), transparent);
+    }
+    .step-num {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: white;
+      font-size: 14px;
+      font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(26,36,86,.25);
+    }
+    .step h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 6px;
+      letter-spacing: -.2px;
+    }
+    .step p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .how-visual {
+      background: var(--navy);
+      border-radius: 24px;
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+      min-height: 460px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .how-visual::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(45,106,223,.35) 0%, transparent 70%);
+    }
+    .visual-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(255,255,255,.4);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .visual-card {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .visual-card-label {
+      font-size: 10px;
+      color: rgba(255,255,255,.45);
+      font-weight: 600;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .visual-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .visual-bar-label { font-size: 10px; color: rgba(255,255,255,.6); width: 60px; flex-shrink: 0; }
+    .visual-bar-track {
+      flex: 1;
+      height: 6px;
+      background: rgba(255,255,255,.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .visual-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--blue-lt), #93C5FD);
+    }
+    .visual-bar-val { font-size: 10px; color: rgba(255,255,255,.7); font-weight: 600; width: 28px; text-align: right; }
+
+    .alert-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .alert-row.critical { background: rgba(220,38,38,.15); border: 1px solid rgba(220,38,38,.2); }
+    .alert-row.warn { background: rgba(217,119,6,.15); border: 1px solid rgba(217,119,6,.2); }
+    .alert-row.ok { background: rgba(5,150,105,.15); border: 1px solid rgba(5,150,105,.2); }
+    .alert-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .alert-dot.red { background: #F87171; }
+    .alert-dot.yellow { background: #FBBF24; }
+    .alert-dot.green { background: #34D399; }
+    .alert-text { font-size: 10px; color: rgba(255,255,255,.75); }
+    .alert-time { margin-left: auto; font-size: 9px; color: rgba(255,255,255,.3); }
+
+    /* ── CTA ── */
+    .cta-section {
+      background: linear-gradient(135deg, var(--navy) 0%, #1E3A8A 60%, var(--blue) 100%);
+      text-align: center;
+      padding: 100px 5%;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: -100px; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(147,197,253,.08) 0%, transparent 70%);
+    }
+    .cta-section h2 { color: white; margin-bottom: 16px; position: relative; }
+    .cta-section p { color: rgba(255,255,255,.65); margin: 0 auto 40px; position: relative; }
+    .cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; position: relative; }
+    .btn-white {
+      background: white;
+      color: var(--navy);
+    }
+    .btn-white:hover {
+      background: var(--light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,.2);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--dark);
+      padding: 60px 5% 32px;
+      color: rgba(255,255,255,.45);
+      font-size: 14px;
+    }
+    .footer-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+      padding-bottom: 48px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      margin-bottom: 32px;
+    }
+    .footer-brand img { height: 32px; margin-bottom: 14px; filter: brightness(10); }
+    .footer-brand p { font-size: 13px; line-height: 1.7; max-width: 240px; }
+    .footer-col h5 {
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(255,255,255,.7);
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-col a {
+      color: rgba(255,255,255,.4);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color .2s;
+    }
+    .footer-col a:hover { color: rgba(255,255,255,.8); }
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-bottom span { font-size: 12px; }
+
+    /* ── MOBILE ── */
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+    .hamburger span { width: 22px; height: 2px; background: var(--navy); border-radius: 2px; display: block; }
+
+    @media (max-width: 1024px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-top { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links, .nav-cta { display: none; }
+      .hamburger { display: flex; }
+
+      .hero { padding: 88px 20px 60px; }
+      .hero-inner { grid-template-columns: 1fr; }
+      .hero-mockups { display: none; }
+      .hero h1 { font-size: 36px; }
+      .hero-stats { gap: 24px; }
+
+      section { padding: 64px 20px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .how-inner { grid-template-columns: 1fr; }
+      .how-visual { display: none; }
+      .footer-top { grid-template-columns: 1fr; gap: 32px; }
+      .footer-bottom { flex-direction: column; gap: 10px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVIGATION ── -->
+<nav id="nav">
+  <a href="#" class="nav-logo">
+    <img src="/brand_assets/security management system sign blue.png" alt="SMS Logo" />
+    <span>Security Management<br>System</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Funktioner</a></li>
+    <li><a href="#how-it-works">Hur det fungerar</a></li>
+    <li><a href="docs/index.html">Dokumentation</a></li>
+    <li><a href="#contact">Kontakt</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="docs/index.html" class="btn btn-outline">Docs</a>
+    <a href="#contact" class="btn btn-primary">Begär demo</a>
+  </div>
+  <div class="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero" id="hero">
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge"><span></span>Plattform för företagssäkerhet</div>
+      <h1>Komplett säkerhetsdrift,<br><em>samlad</em></h1>
+      <p>Hantera vakter, incidenter, rondering och tillgångar från en enda intelligent plattform. Realtidsöverblick över hela din säkerhetsdrift.</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn btn-primary btn-lg">Begär demo</a>
+        <a href="docs/index.html" class="btn btn-lg btn-hero-outline">Visa dokumentation</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <strong>99.9%</strong>
+          <span>Drifttid SLA</span>
+        </div>
+        <div class="hero-stat">
+          <strong>&lt;2s</strong>
+          <span>Larmsvarstid</span>
+        </div>
+        <div class="hero-stat">
+          <strong>ISO 27001</strong>
+          <span>Certifierad</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOBILE MOCKUPS -->
+    <div class="hero-mockups" aria-hidden="true">
+      <div class="phone-wrap back">
+        <img src="/brand_assets/mockup1.png" alt="SMS app navigering" class="mockup-img" />
+      </div>
+      <div class="phone-wrap front">
+        <img src="/brand_assets/mockup2.png" alt="SMS app dashboard" class="mockup-img" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ── -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="features-header">
+      <div class="section-label">Plattformsfunktioner</div>
+      <h2>Allt din säkerhetsdrift<br>behöver</h2>
+      <p class="section-sub">Från vaktkontroll till incidenthantering i realtid — SMS ger dig verktygen för en modern, datadriven säkerhetsdrift.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#EEF3FF">🛡️</div>
+        <h3>Incidenthantering</h3>
+        <p>Logga, spåra och lös säkerhetsincidenter med fullständiga revisionsloggar, fotodokumentation och automatiserade eskaleringsflöden.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#F0FDF4">📍</div>
+        <h3>Live-spårning av vakter</h3>
+        <p>GPS-positionering i realtid för all tjänstgörande personal. Övervaka ronderingsvägar, kontrollpunktsavstämning och responstider.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#FFF7ED">📋</div>
+        <h3>Schemaläggning</h3>
+        <p>Intelligent schemaläggning med konfliktidentifiering, övertidsvarningar och enklickspassbyte för att eliminera bemanningsbrister.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#FEF2F2">🔔</div>
+        <h3>Smarta larm</h3>
+        <p>Omedelbara push-notiser för kritiska händelser. Konfigurera larmregler efter plats, allvarlighetsgrad och ansvarigt team.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#EEF3FF">📊</div>
+        <h3>Analys och rapporter</h3>
+        <p>Heltäckande instrumentpaneler med KPI:er, trendanalys och exporterbara rapporter för regelefterlevnad och klientfakturering.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#F0FDF4">🔐</div>
+        <h3>Åtkomstkontroll</h3>
+        <p>Rollbaserade behörigheter, SSO-integration och fullständig aktivitetslogg som säkerställer att endast behörig personal kan vidta åtgärder.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="how" id="how-it-works">
+  <div class="container">
+    <div class="how-inner">
+      <div>
+        <div class="section-label">Hur det fungerar</div>
+        <h2>Igång på<br>minuter</h2>
+        <p class="section-sub" style="margin-bottom:40px">Ingen komplicerad installation. SMS driftsätts snabbt med guidad onboarding för varje roll.</p>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div>
+              <h4>Konfigurera dina platser</h4>
+              <p>Lägg till platser, definiera zoner, ladda upp planritningar och ställ in kontrollpunkts-QR-koder eller NFC-taggar.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div>
+              <h4>Introducera ditt team</h4>
+              <p>Bjud in vakter och arbetsledare. Tilldela roller, zoner och scheman. Vakterna får mobilappen omedelbart.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div>
+              <h4>Gå live</h4>
+              <p>Starta rondering, logga incidenter och se din kommandoinstrumentpanel i realtid från dag ett.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div>
+              <h4>Analysera och förbättra</h4>
+              <p>Använd inbyggda rapporter för att identifiera täckningsluckor, minska responstider och demonstrera värde för kunder.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="how-visual">
+        <div class="visual-title">Driftsöversikt i realtid</div>
+        <div class="visual-card">
+          <div class="visual-card-label">Ronderingstäckning per zon</div>
+          <div class="visual-bar-row">
+            <div class="visual-bar-label">Zone A</div>
+            <div class="visual-bar-track"><div class="visual-bar-fill" style="width:94%"></div></div>
+            <div class="visual-bar-val">94%</div>
+          </div>
+          <div class="visual-bar-row">
+            <div class="visual-bar-label">Zone B</div>
+            <div class="visual-bar-track"><div class="visual-bar-fill" style="width:87%"></div></div>
+            <div class="visual-bar-val">87%</div>
+          </div>
+          <div class="visual-bar-row">
+            <div class="visual-bar-label">Zone C</div>
+            <div class="visual-bar-track"><div class="visual-bar-fill" style="width:100%"></div></div>
+            <div class="visual-bar-val">100%</div>
+          </div>
+          <div class="visual-bar-row">
+            <div class="visual-bar-label">Zone D</div>
+            <div class="visual-bar-track"><div class="visual-bar-fill" style="width:72%"></div></div>
+            <div class="visual-bar-val">72%</div>
+          </div>
+        </div>
+        <div class="visual-card">
+          <div class="visual-card-label">Senaste larm</div>
+          <div class="alert-row critical">
+            <div class="alert-dot red"></div>
+            <div class="alert-text">Perimeterbrott — Port B</div>
+            <div class="alert-time">2 min</div>
+          </div>
+          <div class="alert-row warn">
+            <div class="alert-dot yellow"></div>
+            <div class="alert-text">Missad kontrollpunkt — Rutt 3</div>
+            <div class="alert-time">14 min</div>
+          </div>
+          <div class="alert-row ok">
+            <div class="alert-dot green"></div>
+            <div class="alert-text">Alla zoner säkrade — Nattskift</div>
+            <div class="alert-time">1 tim</div>
+          </div>
+        </div>
+        <div class="visual-card" style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div class="visual-card-label">Vakter i tjänst</div>
+            <div style="font-size:32px;font-weight:800;color:white;letter-spacing:-1px;line-height:1">24</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:4px">av 28 schemalagda</div>
+          </div>
+          <div style="text-align:right">
+            <div class="visual-card-label">Incidenter idag</div>
+            <div style="font-size:32px;font-weight:800;color:#F87171;letter-spacing:-1px;line-height:1">3</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:4px">↓ 40% jämfört med igår</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta-section" id="contact">
+  <div class="container">
+    <div class="section-label" style="color:rgba(255,255,255,.5);justify-content:center">
+      <span style="background:rgba(255,255,255,.3)"></span>Kom igång
+    </div>
+    <h2>Redo att modernisera<br>din säkerhetsdrift?</h2>
+    <p class="section-sub">Anslut dig till säkerhetsteam som redan driver smartare verksamheter med SMS. Begär en personlig demo idag.</p>
+    <div class="cta-actions">
+      <a href="mailto:demo@sms-platform.com" class="btn btn-lg btn-white">Begär demo</a>
+      <a href="docs/index.html" class="btn btn-lg btn-hero-outline">Läs dokumentationen</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img src="/brand_assets/security management system sign blue.png" alt="SMS" />
+        <p>En heltäckande plattform för företagssäkerhetsteam — hantera personal, platser och incidenter från ett ställe.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Produkt</h5>
+        <ul>
+          <li><a href="#features">Funktioner</a></li>
+          <li><a href="#how-it-works">Hur det fungerar</a></li>
+          <li><a href="#">Priser</a></li>
+          <li><a href="#">Ändringslogg</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Resurser</h5>
+        <ul>
+          <li><a href="docs/index.html">Dokumentation</a></li>
+          <li><a href="#">API-referens</a></li>
+          <li><a href="#">Statussida</a></li>
+          <li><a href="#">Support</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Företag</h5>
+        <ul>
+          <li><a href="#">Om oss</a></li>
+          <li><a href="#">Integritetspolicy</a></li>
+          <li><a href="#">Användarvillkor</a></li>
+          <li><a href="#contact">Kontakt</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Security Management System. Alla rättigheter förbehållna.</span>
+      <span>Byggt för företagssäkerhetsteam.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 20);
+  });
+
+  function toggleMenu() {
+    const links = document.querySelector('.nav-links');
+    const cta = document.querySelector('.nav-cta');
+    if (links.style.display === 'flex') {
+      links.style.display = '';
+      cta.style.display = '';
+    } else {
+      links.style.cssText = 'display:flex;flex-direction:column;position:absolute;top:72px;left:0;right:0;background:white;padding:20px 5%;gap:16px;border-bottom:1px solid #E5E9F2;box-shadow:0 8px 20px rgba(0,0,0,.08)';
+      cta.style.cssText = 'display:flex;flex-direction:column;position:absolute;top:72px;left:0;right:0;background:white;padding:0 5% 20px;gap:10px;border-bottom:1px solid #E5E9F2;';
+    }
+  }
+</script>
+</body>
+</html>

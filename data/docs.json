@@ -1,0 +1,15 @@
+{
+  "pages": [
+    {
+      "id": "seed01",
+      "title": "Introduction",
+      "subtitle": "Welcome to the Security Management System documentation",
+      "category": "Getting Started",
+      "content": "## Overview\n\nWelcome to the **Security Management System** (SMS) — a comprehensive platform for managing security operations, personnel, incidents, and more.\n\n## What You Can Do\n\n- Manage guards and their schedules\n- Track real-time patrol routes and checkpoints\n- Log and resolve security incidents with full audit trails\n- Generate compliance and client billing reports\n- Configure sites, zones, and access control rules\n\n## Navigation\n\nUse the sidebar to navigate through the documentation sections. Each category groups related topics together.\n\n> **Note:** This is a sample page. You can edit or delete it from the admin panel at `/admin/login.html`.",
+      "slug": "introduction",
+      "order": 0,
+      "createdAt": "2025-04-29T00:00:00.000Z",
+      "updatedAt": "2025-04-29T00:00:00.000Z"
+    }
+  ]
+}

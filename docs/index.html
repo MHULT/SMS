@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dokumentation — Security Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #1A2456;
+      --blue:   #2D6ADF;
+      --light:  #EEF3FF;
+      --muted:  #6B7280;
+      --border: #E5E9F2;
+      --bg:     #F8FAFF;
+      --white:  #FFFFFF;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      color: #0F172A;
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; height: 64px;
+      background: white; border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 10px rgba(26,36,86,.06);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo img { height: 30px; }
+    .nav-logo span { font-size: 14px; font-weight: 700; color: var(--navy); letter-spacing: -.2px; }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .nav-link {
+      font-size: 13px; font-weight: 500; color: var(--muted);
+      text-decoration: none; padding: 6px 12px; border-radius: 7px; transition: all .15s;
+    }
+    .nav-link:hover { background: var(--light); color: var(--navy); }
+    .nav-admin {
+      font-size: 12px; font-weight: 600; color: var(--blue);
+      border: 1.5px solid var(--border); padding: 5px 12px; border-radius: 7px;
+      text-decoration: none; transition: all .15s;
+    }
+    .nav-admin:hover { border-color: var(--blue); background: var(--light); }
+
+    .docs-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; padding-top: 64px; }
+
+    .sidebar {
+      position: sticky; top: 64px; height: calc(100vh - 64px);
+      overflow-y: auto; background: white; border-right: 1px solid var(--border);
+      padding: 24px 0 40px;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+
+    .sidebar-section { padding: 0 10px; margin-bottom: 24px; }
+    .sidebar-section h6 {
+      font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      color: #94A3B8; padding: 0 10px 6px; display: block;
+    }
+    .sidebar-section ul { list-style: none; }
+    .sidebar-section li a {
+      display: block; padding: 7px 10px; border-radius: 7px;
+      font-size: 13px; font-weight: 500; color: var(--muted);
+      text-decoration: none; transition: all .12s;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .sidebar-section li a:hover { background: var(--light); color: var(--navy); }
+    .sidebar-section li a.active { background: var(--light); color: var(--navy); font-weight: 600; }
+
+    .sidebar-skeleton { padding: 0 20px; }
+    .skel {
+      height: 10px; background: #E8EDF8; border-radius: 5px; margin-bottom: 10px;
+      animation: shimmer 1.4s infinite;
+    }
+    @keyframes shimmer { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
+
+    .docs-main { min-width: 0; }
+
+    .loading-state { padding: 80px 64px; }
+    .loading-title { height: 36px; background: #E8EDF8; border-radius: 8px; width: 60%; margin-bottom: 12px; animation: shimmer 1.4s infinite; }
+    .loading-sub { height: 18px; background: #E8EDF8; border-radius: 5px; width: 40%; margin-bottom: 32px; animation: shimmer 1.4s infinite .1s; }
+    .loading-line { height: 12px; background: #E8EDF8; border-radius: 5px; margin-bottom: 10px; animation: shimmer 1.4s infinite .2s; }
+
+    .error-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 60vh; padding: 40px; text-align: center;
+    }
+    .error-icon { width: 64px; height: 64px; background: #FEF2F2; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 20px; }
+    .error-state h2 { font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+    .error-state p { font-size: 14px; color: var(--muted); line-height: 1.7; max-width: 360px; }
+    .error-state code { background: #FEF2F2; color: #DC2626; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 60vh; padding: 40px; text-align: center;
+    }
+    .empty-icon { width: 72px; height: 72px; background: var(--light); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 30px; margin-bottom: 20px; }
+    .empty-badge { display: inline-flex; align-items: center; gap: 8px; background: #FEF3C7; border: 1px solid #FDE68A; color: #92400E; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 100px; margin-bottom: 20px; }
+    .empty-badge span { width: 6px; height: 6px; background: #F59E0B; border-radius: 50%; }
+    .empty-state h2 { font-size: 28px; font-weight: 800; color: var(--navy); letter-spacing: -1px; margin-bottom: 12px; }
+    .empty-state p { font-size: 16px; color: var(--muted); line-height: 1.7; max-width: 440px; margin-bottom: 28px; }
+    .btn-admin {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 24px; background: var(--navy); color: white;
+      border-radius: 9px; text-decoration: none; font-size: 14px; font-weight: 600;
+      transition: background .15s, transform .1s, box-shadow .15s;
+    }
+    .btn-admin:hover { background: var(--blue); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(45,106,223,.3); }
+
+    .placeholder-list { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 520px; margin-top: 32px; }
+    .placeholder-item { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; text-align: left; }
+    .placeholder-item-icon { width: 34px; height: 34px; background: var(--light); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+    .placeholder-item h4 { font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
+    .placeholder-item p { font-size: 12px; color: var(--muted); }
+
+    .page-content { padding: 48px 64px 80px; max-width: 860px; }
+    .page-header { margin-bottom: 32px; }
+    .page-header h1 { font-size: clamp(26px, 3vw, 38px); font-weight: 800; color: var(--navy); letter-spacing: -1.2px; line-height: 1.15; margin-bottom: 10px; }
+    .page-subtitle { font-size: 17px; color: var(--muted); line-height: 1.6; }
+    .page-divider { height: 1px; background: var(--border); margin-top: 24px; }
+
+    .prose { margin-top: 32px; line-height: 1.8; color: #1E293B; }
+    .prose h1 { font-size: 26px; font-weight: 800; color: var(--navy); letter-spacing: -.6px; margin: 40px 0 12px; }
+    .prose h2 { font-size: 20px; font-weight: 700; color: var(--navy); letter-spacing: -.3px; margin: 36px 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .prose h3 { font-size: 16px; font-weight: 700; color: var(--navy); margin: 28px 0 8px; }
+    .prose h4 { font-size: 14px; font-weight: 700; color: var(--navy); margin: 20px 0 6px; }
+    .prose p { margin-bottom: 16px; font-size: 15px; }
+    .prose ul, .prose ol { padding-left: 24px; margin-bottom: 16px; }
+    .prose li { font-size: 15px; margin-bottom: 6px; }
+    .prose li::marker { color: var(--blue); }
+    .prose strong { font-weight: 700; color: #0F172A; }
+    .prose em { font-style: italic; }
+    .prose a { color: var(--blue); text-decoration: underline; text-underline-offset: 3px; }
+    .prose a:hover { color: var(--navy); }
+    .prose blockquote { border-left: 3px solid var(--blue); padding: 10px 18px; background: var(--light); border-radius: 0 8px 8px 0; margin: 20px 0; color: #374151; font-size: 15px; }
+    .prose code { background: #F1F5F9; color: #DC2626; padding: 2px 6px; border-radius: 4px; font-size: 13px; font-family: 'SF Mono','Fira Code','Consolas',monospace; }
+    .prose pre { background: #0F172A; border-radius: 10px; padding: 20px 22px; overflow-x: auto; margin: 20px 0; }
+    .prose pre code { background: none; color: #E2E8F0; font-size: 13px; padding: 0; line-height: 1.7; }
+    .prose table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+    .prose th { background: var(--light); color: var(--navy); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; padding: 10px 14px; border: 1px solid var(--border); text-align: left; }
+    .prose td { padding: 10px 14px; border: 1px solid var(--border); color: #374151; }
+    .prose tr:nth-child(even) td { background: var(--bg); }
+    .prose hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+    .prose img { max-width: 100%; border-radius: 8px; margin: 12px 0; }
+
+    .page-meta { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: #94A3B8; display: flex; justify-content: space-between; align-items: center; }
+    .page-meta a { color: var(--blue); text-decoration: none; font-weight: 500; }
+    .page-meta a:hover { text-decoration: underline; }
+
+    @media (max-width: 768px) {
+      .docs-layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; }
+      .page-content { padding: 32px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/index.html" class="nav-logo">
+    <img src="/brand_assets/security management system sign blue.png" alt="SMS" />
+    <span>SMS Dokumentation</span>
+  </a>
+  <div class="nav-right">
+    <a href="/index.html" class="nav-link">← Produkt</a>
+    <a href="/admin/login.html" class="nav-admin">Admin</a>
+  </div>
+</nav>
+
+<div class="docs-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-skeleton">
+      <div class="skel" style="width:50%;height:8px;margin-bottom:14px"></div>
+      <div class="skel" style="width:80%"></div>
+      <div class="skel" style="width:70%"></div>
+      <div class="skel" style="width:75%"></div>
+      <div class="skel" style="width:50%;height:8px;margin:20px 0 14px"></div>
+      <div class="skel" style="width:85%"></div>
+      <div class="skel" style="width:60%"></div>
+    </div>
+  </aside>
+  <main id="main">
+    <div class="loading-state">
+      <div class="loading-title"></div>
+      <div class="loading-sub"></div>
+      <div class="loading-line" style="width:95%"></div>
+      <div class="loading-line" style="width:88%"></div>
+      <div class="loading-line" style="width:92%"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+  marked.setOptions({ breaks: true, gfm: true });
+
+  let allPages = [];
+  let currentSlug = null;
+
+  async function init() {
+    try {
+      const res = await fetch('/api/docs');
+      if (!res.ok) throw new Error('server error');
+      allPages = await res.json();
+    } catch {
+      showServerError();
+      return;
+    }
+    buildSidebar();
+    const hash = window.location.hash.slice(1);
+    if (hash && allPages.find(p => p.slug === hash)) {
+      loadPage(hash);
+    } else if (allPages.length > 0) {
+      loadPage(allPages[0].slug);
+    } else {
+      showEmpty();
+    }
+  }
+
+  function buildSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    if (allPages.length === 0) {
+      sidebar.innerHTML = `<div style="padding:24px 16px;font-size:12px;color:#94A3B8;line-height:1.6">Inga sidor ännu.</div>`;
+      return;
+    }
+    const groups = {};
+    allPages.forEach(p => {
+      const cat = p.category || 'Allmänt';
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(p);
+    });
+    let html = '';
+    Object.entries(groups).forEach(([cat, pages]) => {
+      html += `<div class="sidebar-section"><h6>${esc(cat)}</h6><ul>`;
+      pages.forEach(p => {
+        html += `<li><a href="#${p.slug}" data-slug="${p.slug}" class="${p.slug === currentSlug ? 'active' : ''}" onclick="return handleLink('${p.slug}')">${esc(p.title)}</a></li>`;
+      });
+      html += `</ul></div>`;
+    });
+    sidebar.innerHTML = html;
+  }
+
+  function handleLink(slug) { loadPage(slug); return false; }
+
+  async function loadPage(slug) {
+    currentSlug = slug;
+    window.location.hash = slug;
+    updateActiveLink(slug);
+    document.getElementById('main').innerHTML = `
+      <div class="loading-state">
+        <div class="loading-title"></div><div class="loading-sub"></div>
+        <div class="loading-line" style="width:95%"></div>
+        <div class="loading-line" style="width:88%"></div>
+        <div class="loading-line" style="width:92%"></div>
+      </div>`;
+    try {
+      const res = await fetch(`/api/docs/${slug}`);
+      if (!res.ok) throw new Error('not found');
+      renderPage(await res.json());
+    } catch {
+      document.getElementById('main').innerHTML = `
+        <div class="error-state">
+          <div class="error-icon">🔍</div>
+          <h2>Sidan hittades inte</h2>
+          <p>Sidan du söker finns inte eller har tagits bort.</p>
+        </div>`;
+    }
+  }
+
+  function renderPage(page) {
+    const html = marked.parse(page.content || '');
+    const updated = page.updatedAt
+      ? new Date(page.updatedAt).toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })
+      : '';
+    document.getElementById('main').innerHTML = `
+      <article class="page-content">
+        <header class="page-header">
+          <h1>${esc(page.title)}</h1>
+          ${page.subtitle ? `<p class="page-subtitle">${esc(page.subtitle)}</p>` : ''}
+          <div class="page-divider"></div>
+        </header>
+        <div class="prose">${html}</div>
+        <div class="page-meta">
+          <span>${updated ? `Senast uppdaterad ${updated}` : ''}</span>
+          <a href="/admin/dashboard.html">Redigera den här sidan →</a>
+        </div>
+      </article>`;
+    window.scrollTo(0, 0);
+  }
+
+  function updateActiveLink(slug) {
+    document.querySelectorAll('.sidebar-section li a').forEach(a => {
+      a.classList.toggle('active', a.dataset.slug === slug);
+    });
+  }
+
+  function showEmpty() {
+    document.getElementById('sidebar').innerHTML = `
+      <div style="padding:24px 16px;font-size:12px;color:#94A3B8;line-height:1.6">Inga sidor ännu — lägg till via adminpanelen.</div>`;
+    document.getElementById('main').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📖</div>
+        <div class="empty-badge"><span></span>Pågående</div>
+        <h2>Dokumentation<br>kommer snart</h2>
+        <p>Vi bygger heltäckande dokumentation för Security Management System. Lägg till sidor via adminpanelen för att komma igång.</p>
+        <a href="/admin/login.html" class="btn-admin">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1h6v6M5.5 8.5l7-7M1 5h3a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Öppna adminpanelen
+        </a>
+        <div class="placeholder-list">
+          <div class="placeholder-item"><div class="placeholder-item-icon">🚀</div><div><h4>Snabbstartsguide</h4><p>Konfigurera din första plats och ditt team på under 10 minuter.</p></div></div>
+          <div class="placeholder-item"><div class="placeholder-item-icon">🗺️</div><div><h4>Rondering och kontrollpunkter</h4><p>Definiera rutter, placera QR/NFC-kontrollpunkter och tilldela vakter.</p></div></div>
+          <div class="placeholder-item"><div class="placeholder-item-icon">🔌</div><div><h4>REST API-referens</h4><p>Fullständig ändpunktsdokumentation för att bygga integrationer.</p></div></div>
+          <div class="placeholder-item"><div class="placeholder-item-icon">🔐</div><div><h4>Autentisering och roller</h4><p>JWT-baserad autentisering, rolldefinitioner och behörighetsomfattningar.</p></div></div>
+        </div>
+      </div>`;
+  }
+
+  function showServerError() {
+    document.getElementById('sidebar').innerHTML = `<div style="padding:24px 16px;font-size:12px;color:#94A3B8">Servern körs inte.</div>`;
+    document.getElementById('main').innerHTML = `
+      <div class="error-state">
+        <div class="error-icon">⚡</div>
+        <h2>Servern körs inte</h2>
+        <p>Starta SMS-dokumentationsservern för att visa innehåll.<br><br>
+          Kör följande i mappen <code>website/</code>:<br><br>
+          <code>npm install</code><br>
+          <code>npm start</code><br><br>
+          Besök sedan <code>http://localhost:3000/docs/</code>
+        </p>
+      </div>`;
+  }
+
+  function esc(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  window.addEventListener('hashchange', () => {
+    const slug = window.location.hash.slice(1);
+    if (slug && slug !== currentSlug && allPages.find(p => p.slug === slug)) loadPage(slug);
+  });
+
+  init();
+</script>
+</body>
+</html>

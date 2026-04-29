@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dokumentations-CMS — SMS Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #1A2456;
+      --blue:   #2D6ADF;
+      --light:  #EEF3FF;
+      --border: #E5E9F2;
+      --muted:  #6B7280;
+      --bg:     #F8FAFF;
+      --white:  #FFFFFF;
+    }
+
+    html, body { height: 100%; overflow: hidden; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: #0F172A;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── TOP NAV ── */
+    .topnav {
+      flex-shrink: 0;
+      height: 60px;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 12px;
+      box-shadow: 0 1px 8px rgba(26,36,86,.05);
+      z-index: 10;
+    }
+    .topnav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+    }
+    .topnav-logo img { height: 28px; }
+    .topnav-logo-text { font-size: 14px; font-weight: 700; color: var(--navy); letter-spacing: -.2px; }
+    .topnav-badge {
+      background: var(--light);
+      color: var(--blue);
+      font-size: 11px; font-weight: 600;
+      padding: 3px 9px; border-radius: 100px;
+      letter-spacing: .3px;
+    }
+    .topnav-spacer { flex: 1; }
+    .topnav-link {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 500; color: var(--muted);
+      text-decoration: none; padding: 6px 10px; border-radius: 7px;
+      transition: all .15s;
+    }
+    .topnav-link:hover { background: var(--light); color: var(--navy); }
+    .btn-logout {
+      font-size: 13px; font-weight: 500; color: var(--muted);
+      background: none; border: 1.5px solid var(--border);
+      padding: 6px 14px; border-radius: 7px; cursor: pointer;
+      font-family: inherit; transition: all .15s;
+    }
+    .btn-logout:hover { border-color: #FECACA; color: #DC2626; background: #FEF2F2; }
+
+    /* ── LAYOUT ── */
+    .app-body { flex: 1; display: flex; overflow: hidden; }
+
+    /* ── LEFT PANEL ── */
+    .left-panel {
+      width: 280px;
+      flex-shrink: 0;
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-top { padding: 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+
+    .btn-new {
+      width: 100%;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 10px;
+      background: var(--navy);
+      color: white;
+      border: none; border-radius: 9px;
+      font-size: 13px; font-weight: 600;
+      font-family: inherit; cursor: pointer;
+      transition: background .15s, transform .1s;
+    }
+    .btn-new:hover { background: var(--blue); transform: translateY(-1px); }
+
+    .panel-search { padding: 10px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .panel-search input {
+      width: 100%;
+      padding: 7px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      font-size: 12px; font-family: inherit;
+      color: #0F172A; background: var(--bg);
+      outline: none; transition: border-color .15s;
+    }
+    .panel-search input:focus { border-color: var(--blue); background: white; }
+
+    .pages-list { flex: 1; overflow-y: auto; padding: 8px; }
+    .pages-list::-webkit-scrollbar { width: 4px; }
+    .pages-list::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+
+    .category-group { margin-bottom: 4px; }
+    .category-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: .8px; text-transform: uppercase;
+      color: #94A3B8;
+      padding: 8px 8px 4px;
+      display: block;
+    }
+
+    .page-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px; border-radius: 8px;
+      cursor: pointer; transition: background .12s;
+    }
+    .page-item:hover { background: var(--bg); }
+    .page-item.active { background: var(--light); }
+    .page-item-dot { width: 6px; height: 6px; border-radius: 50%; background: #CBD5E1; flex-shrink: 0; }
+    .page-item.active .page-item-dot { background: var(--blue); }
+    .page-item-title {
+      font-size: 13px; font-weight: 500; color: #374151;
+      flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .page-item.active .page-item-title { color: var(--navy); font-weight: 600; }
+
+    .panel-footer { padding: 12px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .empty-list { padding: 32px 12px; text-align: center; color: #94A3B8; font-size: 13px; line-height: 1.6; }
+
+    /* ── EDITOR AREA ── */
+    .editor-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .empty-state {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: var(--muted); text-align: center; padding: 40px;
+    }
+    .empty-state-icon {
+      width: 64px; height: 64px; background: var(--light); border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; margin-bottom: 20px;
+    }
+    .empty-state h3 { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+    .empty-state p { font-size: 14px; line-height: 1.6; max-width: 280px; }
+
+    .editor-panel { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+    .editor-panel.visible { display: flex; }
+
+    .editor-header {
+      flex-shrink: 0;
+      padding: 20px 28px 0;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .title-input {
+      width: 100%;
+      font-size: 22px; font-weight: 800; font-family: inherit;
+      color: var(--navy); border: none; outline: none; background: transparent;
+      letter-spacing: -.5px; padding: 0 0 12px;
+      border-bottom: 2px solid transparent; transition: border-color .2s;
+    }
+    .title-input:focus { border-bottom-color: var(--blue); }
+    .title-input::placeholder { color: #CBD5E1; }
+
+    .meta-row { display: flex; gap: 10px; padding: 12px 0; }
+    .meta-input {
+      flex: 1; padding: 8px 11px;
+      border: 1.5px solid var(--border); border-radius: 7px;
+      font-size: 13px; font-family: inherit; color: #374151;
+      background: var(--bg); outline: none; transition: border-color .15s, background .15s;
+    }
+    .meta-input:focus { border-color: var(--blue); background: white; }
+    .meta-input::placeholder { color: #94A3B8; }
+    .meta-input.order { flex: 0 0 80px; }
+
+    .editor-body { flex: 1; overflow-y: auto; padding: 20px 28px; }
+    .editor-body::-webkit-scrollbar { width: 4px; }
+    .editor-body::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+
+    .CodeMirror { font-family: 'SF Mono','Fira Code','Consolas',monospace !important; font-size: 14px !important; line-height: 1.7 !important; border-radius: 0 0 9px 9px !important; }
+    .editor-toolbar { border-radius: 9px 9px 0 0 !important; border-color: var(--border) !important; }
+    .editor-toolbar button:hover, .editor-toolbar button.active { background: var(--light) !important; border-color: var(--border) !important; }
+    .EasyMDEContainer .CodeMirror { border-color: var(--border) !important; }
+    .EasyMDEContainer { border-radius: 9px; overflow: hidden; }
+
+    .editor-footer {
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 28px;
+      background: var(--white); border-top: 1px solid var(--border);
+    }
+
+    .btn-delete {
+      display: flex; align-items: center; gap: 6px;
+      padding: 9px 16px; background: none;
+      border: 1.5px solid var(--border); color: var(--muted);
+      border-radius: 8px; font-size: 13px; font-weight: 500;
+      font-family: inherit; cursor: pointer; transition: all .15s;
+    }
+    .btn-delete:hover { border-color: #FECACA; color: #DC2626; background: #FEF2F2; }
+
+    .footer-right { display: flex; align-items: center; gap: 12px; }
+
+    .save-status { font-size: 12px; color: var(--muted); transition: opacity .3s; }
+    .save-status.success { color: #059669; }
+    .save-status.error { color: #DC2626; }
+
+    .btn-save {
+      display: flex; align-items: center; gap: 7px;
+      padding: 9px 20px; background: var(--navy); color: white;
+      border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+      font-family: inherit; cursor: pointer;
+      transition: background .15s, transform .1s, box-shadow .15s;
+    }
+    .btn-save:hover { background: var(--blue); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(45,106,223,.3); }
+    .btn-save:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+    .btn-save.new-page { background: #059669; }
+    .btn-save.new-page:hover { background: #047857; }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="/index.html" class="topnav-logo">
+    <img src="/brand_assets/security management system sign blue.png" alt="SMS" />
+    <span class="topnav-logo-text">SMS</span>
+  </a>
+  <span class="topnav-badge">Dokumentations-CMS</span>
+  <div class="topnav-spacer"></div>
+  <a href="/docs/index.html" class="topnav-link" target="_blank">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1H2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V6.5M8 1h4v4M5 8l6-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Visa dokumentation
+  </a>
+  <button class="btn-logout" onclick="logout()">Logga ut</button>
+</nav>
+
+<div class="app-body">
+
+  <aside class="left-panel">
+    <div class="panel-top">
+      <button class="btn-new" onclick="newPage()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+        Ny sida
+      </button>
+    </div>
+    <div class="panel-search">
+      <input type="search" id="searchInput" placeholder="Sök sidor…" oninput="filterPages()" />
+    </div>
+    <div class="pages-list" id="pagesList"></div>
+    <div class="panel-footer">
+      <div style="font-size:11px;color:#94A3B8;text-align:center" id="pageCount">0 sidor</div>
+    </div>
+  </aside>
+
+  <div class="editor-area">
+
+    <div class="empty-state" id="emptyState">
+      <div class="empty-state-icon">📝</div>
+      <h3>Välj eller skapa en sida</h3>
+      <p>Välj en sida i sidofältet, eller klicka på <strong>Ny sida</strong> för att skapa din första dokumentationssida.</p>
+    </div>
+
+    <div class="editor-panel" id="editorPanel">
+      <div class="editor-header">
+        <input class="title-input" id="titleInput" placeholder="Sidtitel…" />
+        <div class="meta-row">
+          <input class="meta-input" id="categoryInput" placeholder="Kategori (t.ex. Kom igång)" list="categoryList" />
+          <datalist id="categoryList"></datalist>
+          <input class="meta-input" id="subtitleInput" placeholder="Underrubrik (valfritt)" />
+          <input class="meta-input order" id="orderInput" type="number" placeholder="Ordning" min="0" />
+        </div>
+      </div>
+
+      <div class="editor-body">
+        <textarea id="contentEditor"></textarea>
+      </div>
+
+      <div class="editor-footer">
+        <button class="btn-delete" id="deleteBtn" onclick="deletePage()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 3h11M4 3V2a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1M10 3v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Radera
+        </button>
+        <div class="footer-right">
+          <span class="save-status" id="saveStatus"></span>
+          <button class="btn-save" id="saveBtn" onclick="savePage()">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 7l3 3 6-6" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span id="saveBtnText">Spara ändringar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<script>
+  let pages = [];
+  let currentPageId = null;
+  let isNew = false;
+  let editor = null;
+  let allPages = [];
+
+  async function init() {
+    const meRes = await fetch('/api/me').catch(() => null);
+    if (!meRes || !meRes.ok) { redirect(); return; }
+    const me = await meRes.json();
+    if (!me.authenticated) { redirect(); return; }
+    initEditor();
+    await loadPages();
+  }
+
+  function redirect() { window.location.href = '/admin/login.html'; }
+
+  function initEditor() {
+    editor = new EasyMDE({
+      element: document.getElementById('contentEditor'),
+      spellChecker: false,
+      status: false,
+      autosave: { enabled: false },
+      minHeight: '320px',
+      placeholder: 'Skriv din dokumentation här med Markdown…\n\n# Rubrik 1\n## Rubrik 2\n\n**Fet**, *kursiv*, `kod`, [länk](url)\n\n- Punkt\n1. Numrerad lista\n\n> Citat\n\n```\nKodblock\n```',
+      toolbar: [
+        'bold','italic','strikethrough','|',
+        'heading-1','heading-2','heading-3','|',
+        'unordered-list','ordered-list','quote','|',
+        'link','code','table','|',
+        'preview','side-by-side','fullscreen','|',
+        'guide'
+      ]
+    });
+  }
+
+  async function loadPages() {
+    const res = await fetch('/api/docs');
+    allPages = await res.json();
+    pages = [...allPages];
+    buildPageList();
+    updateCategoryDatalist();
+    const n = allPages.length;
+    document.getElementById('pageCount').textContent = `${n} ${n === 1 ? 'sida' : 'sidor'}`;
+  }
+
+  function filterPages() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    pages = q
+      ? allPages.filter(p => p.title.toLowerCase().includes(q) || (p.category || '').toLowerCase().includes(q))
+      : [...allPages];
+    buildPageList();
+  }
+
+  function buildPageList() {
+    const container = document.getElementById('pagesList');
+    if (pages.length === 0) {
+      container.innerHTML = `<div class="empty-list">Inga sidor ännu.<br>Klicka på <strong>Ny sida</strong> för att börja.</div>`;
+      return;
+    }
+    const groups = {};
+    pages.forEach(p => {
+      const cat = p.category || 'Allmänt';
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(p);
+    });
+    let html = '';
+    Object.entries(groups).forEach(([cat, catPages]) => {
+      html += `<div class="category-group"><span class="category-label">${esc(cat)}</span>`;
+      catPages.forEach(p => {
+        html += `<div class="page-item ${p.id === currentPageId ? 'active' : ''}" onclick="selectPage('${p.id}')">
+          <div class="page-item-dot"></div>
+          <span class="page-item-title">${esc(p.title)}</span>
+        </div>`;
+      });
+      html += `</div>`;
+    });
+    container.innerHTML = html;
+  }
+
+  function updateCategoryDatalist() {
+    const cats = [...new Set(allPages.map(p => p.category).filter(Boolean))];
+    document.getElementById('categoryList').innerHTML = cats.map(c => `<option value="${esc(c)}">`).join('');
+  }
+
+  async function selectPage(id) {
+    currentPageId = id;
+    isNew = false;
+    buildPageList();
+    const res = await fetch(`/api/docs/${id}`);
+    const page = await res.json();
+    openEditor(page);
+  }
+
+  function openEditor(page) {
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('editorPanel').classList.add('visible');
+    document.getElementById('titleInput').value = page.title || '';
+    document.getElementById('categoryInput').value = page.category || '';
+    document.getElementById('subtitleInput').value = page.subtitle || '';
+    document.getElementById('orderInput').value = page.order ?? '';
+    editor.value(page.content || '');
+    const saveBtn = document.getElementById('saveBtn');
+    const deleteBtnEl = document.getElementById('deleteBtn');
+    if (isNew) {
+      saveBtn.className = 'btn-save new-page';
+      document.getElementById('saveBtnText').textContent = 'Skapa sida';
+      deleteBtnEl.style.visibility = 'hidden';
+    } else {
+      saveBtn.className = 'btn-save';
+      document.getElementById('saveBtnText').textContent = 'Spara ändringar';
+      deleteBtnEl.style.visibility = 'visible';
+    }
+    setStatus('');
+    document.getElementById('titleInput').focus();
+  }
+
+  function newPage() {
+    currentPageId = null;
+    isNew = true;
+    buildPageList();
+    openEditor({ title: '', category: '', subtitle: '', content: '', order: allPages.length });
+  }
+
+  async function savePage() {
+    const title = document.getElementById('titleInput').value.trim();
+    if (!title) {
+      document.getElementById('titleInput').focus();
+      setStatus('Titel krävs', 'error');
+      return;
+    }
+    const body = {
+      title,
+      subtitle: document.getElementById('subtitleInput').value.trim(),
+      category: document.getElementById('categoryInput').value.trim() || 'Allmänt',
+      content: editor.value(),
+      order: parseInt(document.getElementById('orderInput').value) || 0
+    };
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.disabled = true;
+    document.getElementById('saveBtnText').textContent = 'Sparar…';
+    try {
+      let res;
+      if (isNew) {
+        res = await fetch('/api/docs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      } else {
+        res = await fetch(`/api/docs/${currentPageId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      }
+      if (res.ok) {
+        const page = await res.json();
+        currentPageId = page.id;
+        isNew = false;
+        setStatus('Sparat', 'success');
+        await loadPages();
+        buildPageList();
+        document.getElementById('saveBtn').className = 'btn-save';
+        document.getElementById('saveBtnText').textContent = 'Spara ändringar';
+        document.getElementById('deleteBtn').style.visibility = 'visible';
+      } else {
+        const err = await res.json();
+        setStatus(err.error || 'Fel vid sparning', 'error');
+      }
+    } catch {
+      setStatus('Anslutningsfel', 'error');
+    }
+    saveBtn.disabled = false;
+    document.getElementById('saveBtnText').textContent = isNew ? 'Skapa sida' : 'Spara ändringar';
+  }
+
+  async function deletePage() {
+    if (!currentPageId) return;
+    const title = document.getElementById('titleInput').value || 'den här sidan';
+    if (!confirm(`Radera "${title}"? Det går inte att ångra.`)) return;
+    const res = await fetch(`/api/docs/${currentPageId}`, { method: 'DELETE' });
+    if (res.ok) {
+      currentPageId = null;
+      isNew = false;
+      document.getElementById('editorPanel').classList.remove('visible');
+      document.getElementById('emptyState').style.display = '';
+      await loadPages();
+    }
+  }
+
+  async function logout() {
+    await fetch('/api/logout', { method: 'POST' });
+    window.location.href = '/admin/login.html';
+  }
+
+  function setStatus(msg, type = '') {
+    const el = document.getElementById('saveStatus');
+    el.textContent = msg;
+    el.className = 'save-status' + (type ? ` ${type}` : '');
+    if (type === 'success') setTimeout(() => { if (el.textContent === msg) el.textContent = ''; }, 3000);
+  }
+
+  function esc(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+      e.preventDefault();
+      if (document.getElementById('editorPanel').classList.contains('visible')) savePage();
+    }
+  });
+
+  init();
+</script>
+</body>
+</html>

@@ -7,7 +7,9 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "@vercel/kv": "^2.0.0",
+    "cookie-parser": "^1.4.6",
     "express": "^4.19.2",
-    "express-session": "^1.18.0"
+    "jsonwebtoken": "^9.0.2"
   }
 }

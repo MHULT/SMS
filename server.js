@@ -11,6 +11,7 @@ const DATA_FILE = path.join(__dirname, 'data', 'docs.json');
 const CREDENTIALS = { username: 'admin', password: 'Sms@2025' };
 const JWT_SECRET = process.env.JWT_SECRET || 'sms-local-dev-secret-change-in-prod';
 const IS_VERCEL = process.env.VERCEL === '1';
+const HAS_KV = !!(process.env.KV_REST_API_URL);
 
 // Local dev: ensure data file exists
 if (!IS_VERCEL) {
@@ -24,21 +25,27 @@ if (!IS_VERCEL) {
 // ── STORAGE ───────────────────────────────────────────────────────────────────
 
 async function readData() {
-  if (IS_VERCEL) {
+  if (HAS_KV) {
     const { kv } = require('@vercel/kv');
     const pages = await kv.get('sms_pages') ?? [];
     return { pages };
   }
-  return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+  try {
+    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+  } catch {
+    return { pages: [] };
+  }
 }
 
 async function writeData(data) {
-  if (IS_VERCEL) {
+  if (HAS_KV) {
     const { kv } = require('@vercel/kv');
     await kv.set('sms_pages', data.pages);
     return;
   }
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+  if (!IS_VERCEL) {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+  }
 }
 
 function slugify(str) {
